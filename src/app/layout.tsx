@@ -1,8 +1,11 @@
+import authOptions from "./api/auth/[...nextauth]/authOptions";
 import "./globals.css";
+import AuthSessionProvider from "@/components/auth/AuthSessionProvider";
 import FooterBar from "@/components/page/FooterBar";
 import NavBar from "@/components/page/NavBar";
 import { font } from "@/styles/fonts";
 import type { Metadata } from "next";
+import { getServerSession } from "next-auth";
 
 const title = "scavcase.watch";
 const description = "Track and share scav case values in Escape from Tarkov";
@@ -32,22 +35,26 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getServerSession(authOptions);
+
   return (
     <html lang="en" className="bg-background text-text">
-      <body className={font.className}>
-        <div className="mx-auto flex h-screen w-full max-w-screen-md flex-col justify-between px-4">
-          <div className="flex flex-col gap-1">
-            <NavBar title={metadata.title?.toString() ?? ""} />
-            {children}
+      <AuthSessionProvider session={session}>
+        <body className={font.className}>
+          <div className="mx-auto flex h-screen w-full max-w-screen-md flex-col justify-between px-4">
+            <div className="flex flex-col gap-1">
+              <NavBar title={metadata.title?.toString() ?? ""} />
+              {children}
+            </div>
+            <FooterBar />
           </div>
-          <FooterBar />
-        </div>
-      </body>
+        </body>
+      </AuthSessionProvider>
     </html>
   );
 }

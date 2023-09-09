@@ -13,6 +13,13 @@ const config = {
       secondary: "#757257",
       "call-to": "#0292c0",
     },
+    extend: {
+      animation: {
+        bounce: "bounce 1s ease-in-out infinite",
+        bounce200: "bounce 1s ease-in-out 200ms infinite",
+        bounce400: "bounce 1s ease-in-out 400ms infinite",
+      },
+    },
   },
   plugins: [],
 };
