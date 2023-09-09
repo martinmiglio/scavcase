@@ -1,8 +1,10 @@
 "use client";
 
 import { gql } from "@/__generated__/gql";
+import { ItemByNameQueryQuery } from "@/__generated__/graphql";
 import { useDebounce } from "@/components/hooks/debounce";
 import { initializeApollo } from "@/lib/apolloClient";
+import { ApolloQueryResult } from "@apollo/client";
 import { useEffect, useState } from "react";
 
 export default function ItemSearch({
@@ -11,13 +13,7 @@ export default function ItemSearch({
   setItems?: (items: any) => void;
 }) {
   const [items, setItemsState] = useState<
-    ({
-      __typename?: "Item";
-      id: string;
-      name?: string | null;
-      shortName?: string | null;
-      gridImageLink?: string | null;
-    } | null)[]
+    (ApolloQueryResult<ItemByNameQueryQuery> | null)[]
   >([]);
   const [search, debouncdedSearch, setSearch] = useDebounce("", 250);
 
