@@ -3,23 +3,38 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "concurrently \"graphql-codegen -w\" \"next dev\"",
+    "build": "graphql-codegen && next build",
     "start": "next start",
-    "lint": "next lint"
+    "compile": "graphql-codegen",
+    "lint": "next lint",
+    "format": "prettier -w -l ."
   },
   "dependencies": {
+    "@apollo/client": "^3.8.3",
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/client-preset": "^4.1.0",
+    "@parcel/watcher": "^2.3.0",
+    "@t3-oss/env-nextjs": "^0.6.1",
+    "@trivago/prettier-plugin-sort-imports": "^4.2.0",
+    "@types/lodash": "^4.14.198",
     "@types/node": "20.5.9",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
     "autoprefixer": "10.4.15",
+    "concurrently": "^8.2.1",
+    "deepmerge": "^4.3.1",
     "eslint": "8.48.0",
     "eslint-config-next": "13.4.19",
+    "graphql": "^16.8.0",
+    "lodash": "^4.17.21",
     "next": "13.4.19",
     "postcss": "8.4.29",
+    "prettier-plugin-tailwindcss": "^0.5.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "tailwindcss": "3.3.3",
-    "typescript": "5.2.2"
+    "typescript": "5.2.2",
+    "zod": "^3.22.2"
   }
 }
