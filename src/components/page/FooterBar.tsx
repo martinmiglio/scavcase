@@ -4,7 +4,7 @@ export default function FooterBar() {
   return (
     <footer className="flex w-full flex-row flex-wrap items-center justify-between py-8 text-sm opacity-60">
       <div>
-        Data from{" "}
+        Item data from{" "}
         <Link href="https://tarkov.dev/" className="hover:underline">
           tarkov.dev
         </Link>

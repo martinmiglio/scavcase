@@ -4,4 +4,4 @@
 
 Track and share scav case values in Escape from Tarkov.
 
-Data sourced from [tarkov.dev](https://tarkov.dev/).
+Item data from [tarkov.dev](https://tarkov.dev/).
