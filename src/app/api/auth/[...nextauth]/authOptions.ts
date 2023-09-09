@@ -1,6 +1,7 @@
 import { initializePrisma } from "@/lib/prismaClient";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
+import { Account, AuthOptions, Session } from "next-auth";
+import { JWT } from "next-auth/jwt";
 import GoogleProvider from "next-auth/providers/google";
 import { z } from "zod";
 
@@ -14,7 +15,16 @@ const env = schema.parse(process.env);
 
 const prisma = initializePrisma();
 
-const authOptions = {
+export interface ExtendedSession extends Session {
+  user: {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  };
+}
+
+const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -24,6 +34,23 @@ const authOptions = {
   ],
   debug: process.env.NODE_ENV === "development",
   secret: env.NEXTAUTH_SECRET,
+  callbacks: {
+    async jwt({ token, account }: { token: JWT; account: Account | null }) {
+      if (account) {
+        token.id = account.providerAccountId;
+      }
+      return token;
+    },
+    async session({ session, token }: { session: any; token: JWT }) {
+      if (session.user && token.id) {
+        session.user = {
+          ...session.user,
+          id: token.id,
+        };
+      }
+      return session;
+    },
+  },
 };
 
 export default authOptions;
