@@ -1,15 +1,8 @@
 import config from "@/../tailwind.config.js";
 import { ImageResponse } from "next/server";
-import { z } from "zod";
 
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-
-const schema = z.object({
-  VERCEL_URL: z.string(),
-});
-
-const env = schema.parse(process.env);
 
 export const runtime = "edge";
 
@@ -25,7 +18,7 @@ export async function GET() {
       >
         <div tw="m-auto flex">
           <img
-            src={env.VERCEL_URL + "/icon.svg"}
+            src="https://scavcase.vercel.app/icon.svg"
             height={ICON_SIZE}
             width={ICON_SIZE}
           />

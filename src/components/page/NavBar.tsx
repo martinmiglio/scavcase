@@ -1,11 +1,7 @@
+import logo from "@/../public/icon.svg";
 import Image from "next/image";
 import Link from "next/link";
-import { z } from "zod";
 
-const schema = z.object({
-  VERCEL_URL: z.string(),
-});
-const env = schema.parse(process.env);
 const ICON_SIZE = 50;
 
 export default function NavBar({ title }: { title: string }) {
@@ -13,7 +9,7 @@ export default function NavBar({ title }: { title: string }) {
     <div className="relative flex w-full justify-between py-2">
       <Link href="/" className="flex items-center gap-2">
         <Image
-          src={env.VERCEL_URL + "/icon.svg"}
+          src={logo}
           height={ICON_SIZE}
           width={ICON_SIZE}
           alt="scavcase icon"
