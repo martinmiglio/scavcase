@@ -44,7 +44,7 @@ export async function GET() {
               }}
               tw={`text-6xl w-[66%] text-center leading-normal`}
             >
-              Track and share scav cases in Escape from Tarkov
+              Track and share scav case values in Escape from Tarkov
             </h2>
           </div>
         </div>

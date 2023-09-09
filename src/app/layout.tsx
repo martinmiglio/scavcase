@@ -5,7 +5,7 @@ import { font } from "@/styles/fonts";
 import type { Metadata } from "next";
 
 const title = "scavcase";
-const description = "Track and share scav cases in Escape from Tarkov";
+const description = "Track and share scav case values in Escape from Tarkov";
 
 export const metadata: Metadata = {
   title: title,
