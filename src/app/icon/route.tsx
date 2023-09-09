@@ -18,7 +18,7 @@ export async function GET() {
       >
         <div tw="m-auto flex">
           <img
-            src="https://scavcase.vercel.app/icon.svg"
+            src="https://www.scavcase.watch/icon.svg"
             height={ICON_SIZE}
             width={ICON_SIZE}
           />

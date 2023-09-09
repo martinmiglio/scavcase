@@ -25,7 +25,7 @@ export async function GET() {
           <div tw="flex flex-col items-center my-auto">
             <div tw="flex items-center">
               <img
-                src="https://scavcase.vercel.app/icon.svg"
+                src="https://www.scavcase.watch/icon.svg"
                 height={200}
                 width={200}
               />
@@ -33,9 +33,9 @@ export async function GET() {
                 style={{
                   fontFamily: '"Bold"',
                 }}
-                tw={`py-8 text-[180px] ml-8`}
+                tw={`py-8 text-[125px] ml-8`}
               >
-                scavcase
+                scavcase.watch
               </h1>
             </div>
             <h2

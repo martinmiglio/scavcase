@@ -4,7 +4,7 @@ import NavBar from "@/components/page/NavBar";
 import { font } from "@/styles/fonts";
 import type { Metadata } from "next";
 
-const title = "scavcase";
+const title = "scavcase.watch";
 const description = "Track and share scav case values in Escape from Tarkov";
 
 export const metadata: Metadata = {
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: title,
     description: description,
-    images: ["https://scavcase.vercel.app/og?v3"],
+    images: ["https://www.scavcase.watch/og?v4"],
   },
   openGraph: {
     type: "website",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     siteName: title,
     images: [
       {
-        url: "https://scavcase.vercel.app/og?v3",
+        url: "https://www.scavcase.watch/og?v4",
         width: 1200,
         height: 630,
       },
