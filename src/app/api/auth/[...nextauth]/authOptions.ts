@@ -1,3 +1,4 @@
+import { initializePrisma } from "@/lib/prismaClient";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import GoogleProvider from "next-auth/providers/google";
@@ -11,7 +12,7 @@ const schema = z.object({
 
 const env = schema.parse(process.env);
 
-const prisma = new PrismaClient();
+const prisma = initializePrisma();
 
 const authOptions = {
   adapter: PrismaAdapter(prisma),
