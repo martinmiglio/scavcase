@@ -4,10 +4,32 @@ import NavBar from "@/components/page/NavBar";
 import { font } from "@/styles/fonts";
 import type { Metadata } from "next";
 
+const title = "scavcase";
+const description = "Track and share scav cases in Escape from Tarkov";
+
 export const metadata: Metadata = {
-  title: "scavcase",
-  description: "Track scav cases in Escape from Tarkov",
-  icons: `icon?v2`,
+  title: title,
+  description: description,
+  icons: "icon?v2",
+  twitter: {
+    card: "summary_large_image",
+    title: title,
+    description: description,
+    images: ["https://scavcase.vercel.app/og?v2"],
+  },
+  openGraph: {
+    type: "website",
+    title: title,
+    description: description,
+    siteName: title,
+    images: [
+      {
+        url: "https://scavcase.vercel.app/og?v2",
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
