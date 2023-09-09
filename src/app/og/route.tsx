@@ -42,7 +42,7 @@ export async function GET() {
               style={{
                 fontFamily: '"Regular"',
               }}
-              tw={`text-6xl w-[66%] text-center leading-normal`}
+              tw={`text-6xl w-[70%] text-center leading-normal`}
             >
               Track and share scav case values in Escape from Tarkov
             </h2>

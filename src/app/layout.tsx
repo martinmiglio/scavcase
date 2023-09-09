@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: title,
     description: description,
-    images: ["https://scavcase.vercel.app/og?v2"],
+    images: ["https://scavcase.vercel.app/og?v3"],
   },
   openGraph: {
     type: "website",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     siteName: title,
     images: [
       {
-        url: "https://scavcase.vercel.app/og?v2",
+        url: "https://scavcase.vercel.app/og?v3",
         width: 1200,
         height: 630,
       },
