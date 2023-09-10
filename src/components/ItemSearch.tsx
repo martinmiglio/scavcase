@@ -107,7 +107,7 @@ function Row({
     <tr className="border-collapse">
       <td className="border-y-4 border-dark">
         <Image
-          src={item.image512pxLink ?? "https://placehold.co/512x512"}
+          src={item.image512pxLink ?? "https://via.placeholder.com/512"}
           alt={item.name ?? "Item"}
           height={128}
           width={128}
