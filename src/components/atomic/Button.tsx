@@ -13,7 +13,7 @@ export default function Button({
   return (
     <button
       {...props}
-      className={`whitespace-nowrap py-2 px-3 border-2 bg-background hover:underline border-primary text-primary disabled:text-foreground disabled:border-foreground transition-colors transition-100 ${className}`}
+      className={`transition-100 whitespace-nowrap border-2 border-primary bg-background px-3 py-2 text-primary transition-colors hover:underline disabled:border-foreground disabled:text-foreground ${className}`}
     >
       {children}
     </button>

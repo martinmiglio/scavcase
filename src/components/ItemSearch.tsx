@@ -58,16 +58,16 @@ export default function ItemSearch() {
   };
 
   return (
-    <div className="w-full flex flex-col gap-2">
+    <div className="flex w-full flex-col gap-2">
       <input
         type="text"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="border-2 bg-background border-primary p-2 w-full"
+        className="w-full border-2 border-primary bg-background p-2"
         placeholder="Search for an item..."
       />
       <table className="table-auto">
-        <thead className="bg-dark sticky">
+        <thead className="sticky bg-dark">
           <tr>
             <th className="w-[90px]"></th>
             <th>Name</th>
@@ -111,14 +111,14 @@ function Row({
           alt={item.name ?? "Item"}
           height={128}
           width={128}
-          className="w-[70px] h-[70px] object-contain bg-foreground border border-text mx-auto my-2"
+          className="mx-auto my-2 h-[70px] w-[70px] border border-text bg-foreground object-contain"
         />
       </td>
       <td className="border-y-4 border-dark">{item.name}</td>
       <td align="center" className="border-y-4 border-dark">
         <input
           type="checkbox"
-          className="appearance-none border-primary border-2 h-5 w-5 checked:bg-text"
+          className="h-5 w-5 appearance-none border-2 border-primary checked:bg-text"
           checked={selectedItems.includes(item)}
           onChange={() => toggleSelect(item)}
         />

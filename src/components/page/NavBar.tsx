@@ -7,7 +7,7 @@ const ICON_SIZE = 50;
 
 export default function NavBar({ title }: { title: string }) {
   return (
-    <div className="relative flex w-full justify-between px-4 py-2 mb-2 shadow-lg  bg-background">
+    <div className="relative mb-2 flex w-full justify-between bg-background px-4 py-2  shadow-lg">
       <Link href="/" className="flex items-center gap-2">
         <Image
           src={logo}
@@ -15,7 +15,7 @@ export default function NavBar({ title }: { title: string }) {
           width={ICON_SIZE}
           alt="scavcase icon"
         />
-        <h1 className="text-3xl font-bold text-theme-600">{title}</h1>
+        <h1 className="text-theme-600 text-3xl font-bold">{title}</h1>
       </Link>
       <AccountButton />
     </div>

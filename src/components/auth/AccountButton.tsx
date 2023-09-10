@@ -51,18 +51,18 @@ export default function AccountButton() {
           width={40}
           height={40}
           alt={`${user?.name} pfp`}
-          className="object-cover h-full w-full"
+          className="h-full w-full object-cover"
           priority
           quality={100}
         />
       </div>
       <div
-        className={`absolute flex flex-col right-0 divide-y overflow-hidden border-2 bg-background hover:text-text border-primary text-primary disabled:text-foreground disabled:border-foreground transition-colors transition-100 ${
+        className={`transition-100 absolute right-0 flex flex-col divide-y overflow-hidden border-2 border-primary bg-background text-primary transition-colors hover:text-text disabled:border-foreground disabled:text-foreground ${
           showDropdown ? "opacity-100" : "opacity-0"
         }`}
       >
         <button
-          className="hover:bg-theme-600 whitespace-nowrap py-2 px-3"
+          className="hover:bg-theme-600 whitespace-nowrap px-3 py-2"
           onClick={() => signOut()}
         >
           sign out
