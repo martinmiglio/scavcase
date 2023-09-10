@@ -56,11 +56,11 @@ model VerificationToken {
 model Report {
   id                String   @id @default(cuid())
   createdAt         DateTime @default(now()) // the time that the user submitted the report
-  userId            String // the id of the user who submitted the report
+  userEmail         String // the email of the user who submitted the report
   input_item_id     String // the item id that the user inputted to the scav case
   returned_item_ids String[] // a list of item ids that the user received from the scav case
   cost              Int // the cost of inputting the items into the scav case (at the time of report)
   value             Int // the value of the items that the user received from the scav case (at the time of report)
   patch             String // the version of the game that the user was playing when they submitted the report
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade) // many-to-one
+  user              User     @relation(fields: [userEmail], references: [email], onDelete: Cascade) // many-to-one
 }

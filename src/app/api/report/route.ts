@@ -1,6 +1,4 @@
-import authOptions, {
-  ExtendedSession,
-} from "@/app/api/auth/[...nextauth]/authOptions";
+import authOptions from "@/app/api/auth/[...nextauth]/authOptions";
 import { initializePrisma } from "@/lib/prismaClient";
 import { Prisma } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
@@ -9,18 +7,18 @@ import { NextRequest, NextResponse } from "next/server";
 const prisma = initializePrisma();
 
 export async function POST(request: NextRequest) {
-  const session = (await getServerSession({
+  const session = await getServerSession({
     req: request,
     ...authOptions,
-  })) as ExtendedSession | null;
+  });
 
   const user = session?.user;
 
-  if (!user?.id) {
+  if (!user?.email) {
     return NextResponse.json({ body: "Unauthorized", status: 401 });
   }
 
-  if (await checkRateLimit(user.id)) {
+  if (await checkRateLimit(user.email)) {
     return NextResponse.json({
       body: "You can only make one report every 6 hours",
       status: 403,
@@ -31,7 +29,7 @@ export async function POST(request: NextRequest) {
   const { input_item_id, returned_item_ids, cost, value, patch } = body;
 
   let report = Prisma.validator<Prisma.ReportCreateManyInput>()({
-    userId: user.id,
+    userEmail: user.email,
     input_item_id,
     returned_item_ids,
     cost,
@@ -47,13 +45,15 @@ export async function POST(request: NextRequest) {
   });
 }
 
-async function checkRateLimit(userId: string) {
+async function checkRateLimit(userEmail: string) {
   // check if user has made a post in the last 6hrs
+  const onceEvery = 6 * 60 * 60 * 1000; // 6hrs in ms
+
   const reports = await prisma.report.findMany({
     where: {
-      userId,
+      userEmail,
       createdAt: {
-        gte: new Date(Date.now() - 6 * 60 * 60 * 1000),
+        gte: new Date(Date.now() - onceEvery),
       },
     },
   });
