@@ -1,5 +1,5 @@
-import ItemSearch from "@/components/ItemSearch";
+import ReportInput from "@/components/ReportInput";
 
 export default async function Page() {
-  return <ItemSearch />;
+  return <ReportInput />;
 }
