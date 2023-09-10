@@ -6,7 +6,9 @@ const config = {
   ],
   theme: {
     colors: {
+      dark: "#1B1B1C",
       background: "#2d2d2f",
+      background2: "#2C2B2D",
       foreground: "#4f4f4f",
       text: "#c7c5b3",
       primary: "#9a8866",
@@ -21,6 +23,6 @@ const config = {
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-patterns")],
 };
 export default config;

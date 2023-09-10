@@ -43,16 +43,18 @@ export default async function RootLayout({
   const session = await getServerSession(authOptions);
 
   return (
-    <html lang="en" className="bg-background text-text">
+    <html
+      lang="en"
+      className="text-text pattern-checkered pattern-checkered-scale-[5] pattern-checkered-background2/100 bg-background
+    pattern-size-12"
+    >
       <AuthSessionProvider session={session}>
         <body className={font.className}>
-          <div className="mx-auto flex h-screen w-full max-w-screen-md flex-col justify-between px-4">
-            <div className="flex flex-col gap-1">
-              <NavBar title={metadata.title?.toString() ?? ""} />
-              {children}
-            </div>
-            <FooterBar />
+          <NavBar title={metadata.title?.toString() ?? ""} />
+          <div className="mx-auto flex min-h-screen w-full max-w-screen-lg flex-col justify-between px-4 bg-background border-4 border-dark p-3">
+            <div className="flex flex-col gap-1">{children}</div>
           </div>
+          <FooterBar />
         </body>
       </AuthSessionProvider>
     </html>

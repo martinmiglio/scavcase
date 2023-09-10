@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function FooterBar() {
   return (
-    <footer className="flex w-full flex-row flex-wrap items-center justify-between py-8 text-sm opacity-60">
+    <footer className="flex w-full flex-row flex-wrap items-center justify-between py-6 mt-2 px-4 text-sm opacity-60  bg-dark">
       <div>
         Item data from{" "}
         <Link href="https://tarkov.dev/" className="hover:underline">
