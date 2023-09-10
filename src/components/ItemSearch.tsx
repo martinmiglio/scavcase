@@ -1,21 +1,26 @@
 "use client";
 
-import Image from "./atomic/Image";
 import { gql } from "@/__generated__/gql";
 import { Item } from "@/__generated__/graphql";
+import Button from "@/components/atomic/Button";
+import Image from "@/components/atomic/Image";
 import { useDebounce } from "@/components/hooks/debounce";
 import { initializeApollo } from "@/lib/apolloClient";
 import { useEffect, useState } from "react";
 
-export default function ItemSearch() {
+export default function ItemSearch({
+  setSelectedItems: setSelectedFromProps,
+}: {
+  setSelectedItems?: (items: Item[]) => void;
+}) {
   const [items, setItemsState] = useState<(Item | null)[]>([]);
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
   const [search, debouncdedSearch, setSearch] = useDebounce("", 250);
 
   const apolloClient = initializeApollo();
 
-  const itemByNameQuery = gql(`
-    query itemByNameQuery($name: String) {
+  const itemsByNameQuery = gql(`
+    query itemsByNameQuery($name: String) {
       items(name: $name) {
         name
         shortName
@@ -26,46 +31,62 @@ export default function ItemSearch() {
   `);
 
   useEffect(() => {
-    const setItems = (items: any) => {
-      setItemsState(items);
+    const updateItemList = (items: (Item | null)[]) => {
+      const sortedItems = [
+        ...selectedItems,
+        ...items.filter((item) => item && !selectedItems.includes(item)),
+      ];
+      setItemsState(sortedItems);
     };
 
     if (debouncdedSearch.length === 0) {
-      setItems([]);
+      updateItemList([]);
       return;
     }
 
     apolloClient
       .query({
-        query: itemByNameQuery,
+        query: itemsByNameQuery,
         variables: {
           name: debouncdedSearch,
         },
       })
       .then((results) => {
-        if (setItems) {
-          setItems(results.data.items);
-        }
+        updateItemList(results.data.items as (Item | null)[]);
       });
-  }, [apolloClient, itemByNameQuery, debouncdedSearch]);
+  }, [apolloClient, itemsByNameQuery, debouncdedSearch, selectedItems]);
+
+  const propegateSelection = (items: Item[]) => {
+    setSelectedFromProps?.(items);
+    setSelectedItems(items);
+  };
 
   const toggleSelect = (item: Item) => {
     if (selectedItems.includes(item)) {
-      setSelectedItems(selectedItems.filter((i) => i !== item));
+      propegateSelection(selectedItems.filter((i) => i !== item));
     } else {
-      setSelectedItems([...selectedItems, item]);
+      propegateSelection([...selectedItems, item]);
     }
   };
 
   return (
     <div className="flex w-full flex-col gap-2">
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full border-2 border-primary bg-background p-2"
-        placeholder="Search for an item..."
-      />
+      <span className="flex w-full gap-2">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full border-2 border-primary bg-background p-2"
+          placeholder="Search for an item..."
+        />
+        <Button
+          onClick={() => {
+            setSelectedItems([]);
+          }}
+        >
+          Clear
+        </Button>
+      </span>
       <table className="table-auto">
         <thead className="sticky bg-dark">
           <tr>
