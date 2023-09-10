@@ -35,7 +35,7 @@ export default function AccountButton() {
   const signedIn = session && session.status === "authenticated";
 
   if (!signedIn) {
-    return <Button onClick={() => signIn()}>sign in</Button>;
+    return <Button onClick={() => signIn()}>Sign In</Button>;
   }
 
   const { user } = session.data;
@@ -43,7 +43,7 @@ export default function AccountButton() {
   return (
     <div className="relative" ref={dropdownRef}>
       <div
-        className="m-2 h-8 w-8 overflow-hidden rounded-full"
+        className="m-2 h-8 w-8 cursor-pointer overflow-hidden rounded-full"
         onClick={toggleDropdown}
       >
         <Image
@@ -57,15 +57,15 @@ export default function AccountButton() {
         />
       </div>
       <div
-        className={`transition-100 absolute right-0 flex flex-col divide-y overflow-hidden border-2 border-primary bg-background transition-colors z-20 ${
+        className={`transition-100 absolute right-0 z-20 flex flex-col divide-y overflow-hidden border-2 border-primary bg-background transition-colors ${
           showDropdown ? "opacity-100" : "opacity-0"
         }`}
       >
         <span className="whitespace-nowrap p-2">
           Hello {user?.name ?? "stranger"}
         </span>
-        <div className="p-2 flex flex-col">
-          <Button onClick={() => signOut()}>sign out</Button>
+        <div className="flex flex-col p-2">
+          <Button onClick={() => signOut()}>Sign Out</Button>
         </div>
       </div>
     </div>
