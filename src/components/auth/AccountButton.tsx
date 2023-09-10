@@ -35,7 +35,7 @@ export default function AccountButton() {
   const signedIn = session && session.status === "authenticated";
 
   if (!signedIn) {
-    return <Button onClick={() => signIn("google")}>sign in</Button>;
+    return <Button onClick={() => signIn()}>sign in</Button>;
   }
 
   const { user } = session.data;
@@ -57,11 +57,16 @@ export default function AccountButton() {
         />
       </div>
       <div
-        className={`transition-100 absolute right-0 flex flex-col divide-y overflow-hidden border-2 border-primary bg-background text-primary transition-colors hover:text-text disabled:border-foreground disabled:text-foreground ${
+        className={`transition-100 absolute right-0 flex flex-col divide-y overflow-hidden border-2 border-primary bg-background transition-colors z-20 ${
           showDropdown ? "opacity-100" : "opacity-0"
         }`}
       >
-        <Button onClick={() => signOut()}>sign out</Button>
+        <span className="whitespace-nowrap p-2">
+          Hello {user?.name ?? "stranger"}
+        </span>
+        <div className="p-2 flex flex-col">
+          <Button onClick={() => signOut()}>sign out</Button>
+        </div>
       </div>
     </div>
   );
