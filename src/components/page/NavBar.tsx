@@ -7,17 +7,19 @@ const ICON_SIZE = 50;
 
 export default function NavBar({ title }: { title: string }) {
   return (
-    <div className="relative mb-2 flex w-full justify-between bg-background px-4 py-2  shadow-lg">
-      <Link href="/" className="flex items-center gap-2">
-        <Image
-          src={logo}
-          height={ICON_SIZE}
-          width={ICON_SIZE}
-          alt="scavcase icon"
-        />
-        <h1 className="text-theme-600 text-3xl font-bold">{title}</h1>
+    <nav className="relative mb-2 flex w-full justify-between bg-background px-4 py-2  shadow-lg">
+      <Link href="/">
+        <header className="flex items-center gap-2">
+          <Image
+            src={logo}
+            height={ICON_SIZE}
+            width={ICON_SIZE}
+            alt="scavcase icon"
+          />
+          <h1 className="text-3xl font-bold">{title}</h1>
+        </header>
       </Link>
       <AccountButton />
-    </div>
+    </nav>
   );
 }

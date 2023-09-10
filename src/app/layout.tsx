@@ -50,9 +50,9 @@ export default async function RootLayout({
       <AuthSessionProvider session={session}>
         <body className={font.className}>
           <NavBar title={metadata.title?.toString() ?? ""} />
-          <div className="mx-auto flex min-h-screen w-full max-w-screen-lg flex-col justify-between border-4 border-dark bg-background p-3 px-4">
-            <div className="flex flex-col gap-1">{children}</div>
-          </div>
+          <main className="mx-auto min-h-screen w-full max-w-screen-lg border-4 border-dark bg-background p-3 px-4">
+            {children}
+          </main>
           <FooterBar />
         </body>
       </AuthSessionProvider>

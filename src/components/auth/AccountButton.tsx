@@ -61,12 +61,7 @@ export default function AccountButton() {
           showDropdown ? "opacity-100" : "opacity-0"
         }`}
       >
-        <button
-          className="hover:bg-theme-600 whitespace-nowrap px-3 py-2"
-          onClick={() => signOut()}
-        >
-          sign out
-        </button>
+        <Button onClick={() => signOut()}>sign out</Button>
       </div>
     </div>
   );
