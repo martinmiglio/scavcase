@@ -8,8 +8,9 @@ import { initializeApollo } from "@/lib/apolloClient";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-export interface ReturnItem {
+export interface SelectedItem {
   id: string;
+  quantity?: number;
   name?: string | null;
   shortName?: string | null;
   image512pxLink?: string | null;
@@ -19,10 +20,10 @@ export interface ReturnItem {
 export default function ItemSearch({
   setSelectedItems: setSelectedFromProps,
 }: {
-  setSelectedItems?: (items: ReturnItem[]) => void;
+  setSelectedItems?: (items: SelectedItem[]) => void;
 }) {
-  const [items, setItemsState] = useState<ReturnItem[]>([]);
-  const [selectedItems, setSelectedItems] = useState<ReturnItem[]>([]);
+  const [items, setItemsState] = useState<SelectedItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [search, debouncdedSearch, setSearch] = useDebounce("", 250);
 
   const apolloClient = initializeApollo();
@@ -40,7 +41,7 @@ export default function ItemSearch({
   `);
 
   useEffect(() => {
-    const updateItemList = (items: ReturnItem[]) => {
+    const updateItemList = (items: SelectedItem[]) => {
       const sortedItems = [
         ...selectedItems,
         ...items.filter((item) => item && !selectedItems.includes(item)),
@@ -61,12 +62,14 @@ export default function ItemSearch({
         },
       })
       .then((results) => {
-        const items = results.data.items.filter((item) => item !== null);
-        updateItemList(items as ReturnItem[]);
+        const items = results.data.items.filter(
+          (item) => item !== null,
+        ) as SelectedItem[];
+        updateItemList(items);
       });
   }, [apolloClient, itemsByNameQuery, debouncdedSearch, selectedItems]);
 
-  const toggleSelect = (item: ReturnItem) => {
+  const toggleSelect = (item: SelectedItem) => {
     if (selectedItems.includes(item)) {
       const updatedItemList = selectedItems.filter((i) => i !== item);
       setSelectedFromProps?.(updatedItemList);
@@ -102,6 +105,7 @@ export default function ItemSearch({
             <th className="w-[90px]"></th>
             <th>Name</th>
             <th className="w-[90px]">Select</th>
+            <th className="w-[90px]">Quantity</th>
           </tr>
         </thead>
         <tbody>
@@ -114,7 +118,21 @@ export default function ItemSearch({
                 item={item}
                 key={uuidv4()}
                 toggleSelect={toggleSelect}
-                selectedItems={selectedItems}
+                selected={selectedItems.includes(item)}
+                quantity={item.quantity}
+                setQuantity={(quantity) => {
+                  const updatedItemList = selectedItems.map((i) => {
+                    if (i === item) {
+                      return {
+                        ...i,
+                        quantity,
+                      };
+                    }
+                    return i;
+                  });
+                  setSelectedFromProps?.(updatedItemList);
+                  setSelectedItems(updatedItemList);
+                }}
               />
             );
           })}
@@ -126,12 +144,16 @@ export default function ItemSearch({
 
 function Row({
   item,
-  selectedItems,
+  selected,
   toggleSelect,
+  quantity,
+  setQuantity,
 }: {
-  item: ReturnItem;
-  selectedItems: ReturnItem[];
-  toggleSelect: (item: ReturnItem) => void;
+  item: SelectedItem;
+  selected: boolean;
+  toggleSelect: (item: SelectedItem) => void;
+  quantity?: number;
+  setQuantity: (quantity: number) => void;
 }) {
   return (
     <tr className="border-collapse">
@@ -154,7 +176,7 @@ function Row({
           <input
             type="checkbox"
             className="transition-100 peer h-7 w-7 shrink-0 appearance-none border-2 border-primary transition-colors checked:bg-primary"
-            checked={selectedItems.includes(item)}
+            checked={selected}
             onChange={() => {}} // noop
           />
           <svg
@@ -167,6 +189,15 @@ function Row({
             <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z" />
           </svg>
         </div>
+      </td>
+      <td className="border-y-4 border-dark">
+        <input
+          type="number"
+          className="w-full border-2 border-primary bg-background p-2 disabled:text-foreground"
+          disabled={!selected}
+          onChange={(e) => setQuantity(parseInt(e.target.value))}
+          value={quantity ?? 1}
+        />
       </td>
     </tr>
   );

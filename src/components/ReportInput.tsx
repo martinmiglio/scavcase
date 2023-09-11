@@ -1,13 +1,13 @@
 "use client";
 
 import InputSelector, { InputItem } from "@/components/InputSelector";
-import ItemSearch, { ReturnItem } from "@/components/ItemSearch";
+import ItemSearch, { SelectedItem } from "@/components/ItemSearch";
 import Button from "@/components/atomic/Button";
 import { useState } from "react";
 
 export default function ReportInput() {
   const [inputItem, setInputItem] = useState<InputItem | null>(null);
-  const [returnItems, setReturnItems] = useState<ReturnItem[]>([]);
+  const [outputItems, setOutputItems] = useState<SelectedItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const onSubmit = async () => {
@@ -18,11 +18,17 @@ export default function ReportInput() {
     setSubmitting(true);
 
     const newReport = {
-      input_item_id: inputItem?.itemId,
-      returned_item_ids: returnItems.map((item) => item.id),
+      inputItem: {
+        itemId: inputItem?.itemId,
+        quantity: inputItem?.quantity,
+      },
+      outputItems: outputItems.map((item) => ({
+        itemId: item.id,
+        quantity: item.quantity ?? 1,
+      })),
       cost: inputItem?.value,
-      value: returnItems.reduce(
-        (acc, item) => acc + (item.avg24hPrice ?? 0),
+      value: outputItems.reduce(
+        (acc, item) => acc + (item.avg24hPrice ?? 0) * (item.quantity ?? 1),
         0,
       ),
       patch: process.env.NEXT_PUBLIC_GAME_PATCH,
@@ -54,13 +60,13 @@ export default function ReportInput() {
         <h2 className="text-2xl">Report a scav case</h2>
         <Button
           onClick={onSubmit}
-          disabled={!inputItem || returnItems.length === 0 || submitting}
+          disabled={!inputItem || outputItems.length === 0 || submitting}
         >
           Submit
         </Button>
       </span>
       <InputSelector setSelectedItem={setInputItem} />
-      <ItemSearch setSelectedItems={setReturnItems} />
+      <ItemSearch setSelectedItems={setOutputItems} />
     </div>
   );
 }

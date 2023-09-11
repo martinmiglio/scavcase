@@ -54,13 +54,31 @@ model VerificationToken {
 }
 
 model Report {
-  id                String   @id @default(cuid())
-  createdAt         DateTime @default(now()) // the time that the user submitted the report
-  userEmail         String // the email of the user who submitted the report
-  input_item_id     String // the item id that the user inputted to the scav case
-  returned_item_ids String[] // a list of item ids that the user received from the scav case
-  cost              Int // the cost of inputting the items into the scav case (at the time of report)
-  value             Int // the value of the items that the user received from the scav case (at the time of report)
-  patch             String // the version of the game that the user was playing when they submitted the report
-  user              User     @relation(fields: [userEmail], references: [email], onDelete: Cascade) // many-to-one
+  id          String       @id @default(cuid())
+  createdAt   DateTime     @default(now()) // the time that the user submitted the report
+  inputItemId String
+  inputItem   InputItem    @relation(fields: [inputItemId], references: [id])
+  outputItems OutputItem[]
+  cost        Int // the cost of inputting the items into the scav case (at the time of report)
+  value       Int // the value of the items that the user received from the scav case (at the time of report)
+  patch       String // the version of the game that the user was playing when they submitted the report
+  userEmail   String // the email of the user who submitted the report
+  user        User         @relation(fields: [userEmail], references: [email], onDelete: Cascade)
+}
+
+model InputItem {
+  // possible items that the user could have inputted into the scav case
+  id       String   @id @default(cuid())
+  itemId   String
+  quantity Int
+  Report   Report[]
+}
+
+model OutputItem {
+  // the item that the user received from the scav case
+  id       String @id @default(cuid())
+  itemId   String
+  quantity Int
+  reportId String
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
 }

@@ -1,7 +1,6 @@
 import authOptions from "@/app/api/auth/[...nextauth]/authOptions";
 import prisma from "@/lib/prismaClient";
 import { Prisma } from "@prisma/client";
-import { PrismaClientValidationError } from "@prisma/client/runtime/library";
 import { getServerSession } from "next-auth/next";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -26,49 +25,86 @@ export async function POST(request: NextRequest) {
       },
     );
   }
-
-  const body = await request.json();
-  const { input_item_id, returned_item_ids, cost, value, patch } = body;
-
-  let report = Prisma.validator<Prisma.ReportCreateManyInput>()({
-    userEmail: user.email,
-    input_item_id,
-    returned_item_ids,
-    cost,
-    value,
-    patch,
-  });
-
   try {
-    report = await prisma.report.create({ data: report });
-  } catch (e) {
-    if (e instanceof PrismaClientValidationError) {
+    const body = await request.json();
+    let { inputItem, outputItems, cost, value, patch } = body;
+
+    if (!inputItem || !outputItems || !cost || !value || !patch) {
       return NextResponse.json(
         {},
         {
           status: 400,
-          statusText: "Bad Request",
+          statusText: "Bad Request, missing fields",
         },
       );
     }
 
-    console.error(e);
+    const inputItemFromDB = await prisma.inputItem.findFirst({
+      where: {
+        itemId: inputItem.itemId,
+        quantity: inputItem.quantity,
+      },
+    });
+
+    if (!inputItemFromDB) {
+      return NextResponse.json(
+        {},
+        {
+          status: 400,
+          statusText: "Bad Request, input item not found",
+        },
+      );
+    }
+
+    const report = {
+      userEmail: user.email,
+      cost,
+      value,
+      patch,
+      inputItemId: inputItemFromDB.id,
+    } satisfies Prisma.ReportCreateManyInput;
+
+    const createdReport = await prisma.report.create({ data: report });
+
+    const validOutputItems = outputItems.map(
+      (item: { itemId: string; quantity: number }) => {
+        return {
+          reportId: createdReport.id,
+          itemId: item.itemId,
+          quantity: item.quantity,
+        };
+      },
+    ) as Prisma.OutputItemCreateManyInput | Prisma.OutputItemCreateManyInput[];
+
+    await prisma.outputItem.createMany({
+      data: validOutputItems,
+    });
+
+    const reportWithItems = await prisma.report.findUnique({
+      where: { id: createdReport.id },
+      include: { inputItem: true, outputItems: true },
+    });
+
+    return NextResponse.json({
+      headers: { "content-type": "application/json" },
+      body: reportWithItems,
+    });
+  } catch (e) {
     return NextResponse.json(
       {},
       {
-        status: 500,
-        statusText: "Internal Server Error",
+        status: 400,
+        statusText: "Bad Request",
       },
     );
   }
-
-  return NextResponse.json({
-    headers: { "content-type": "application/json" },
-    body: report,
-  });
 }
 
 async function checkRateLimit(userEmail: string) {
+  if (process.env.NODE_ENV === "development") {
+    return false;
+  }
+
   // check if user has made a post in last x ms
   const onceEvery = 30 * 60 * 1000; // 30m in ms
 
