@@ -1,6 +1,7 @@
 import authOptions from "@/app/api/auth/[...nextauth]/authOptions";
 import { initializePrisma } from "@/lib/prismaClient";
 import { Prisma } from "@prisma/client";
+import { PrismaClientValidationError } from "@prisma/client/runtime/library";
 import { getServerSession } from "next-auth/next";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -15,14 +16,17 @@ export async function POST(request: NextRequest) {
   const user = session?.user;
 
   if (!user?.email) {
-    return NextResponse.json({ body: "Unauthorized", status: 401 });
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   if (await checkRateLimit(user.email)) {
-    return NextResponse.json({
-      body: "You can only make one report every 6 hours",
-      status: 403,
-    });
+    return NextResponse.json(
+      {},
+      {
+        status: 429,
+        statusText: "Too Many Requests",
+      },
+    );
   }
 
   const body = await request.json();
@@ -37,7 +41,28 @@ export async function POST(request: NextRequest) {
     patch,
   });
 
-  report = await prisma.report.create({ data: report });
+  try {
+    report = await prisma.report.create({ data: report });
+  } catch (e) {
+    if (e instanceof PrismaClientValidationError) {
+      return NextResponse.json(
+        {},
+        {
+          status: 400,
+          statusText: "Bad Request",
+        },
+      );
+    }
+
+    console.error(e);
+    return NextResponse.json(
+      {},
+      {
+        status: 500,
+        statusText: "Internal Server Error",
+      },
+    );
+  }
 
   return NextResponse.json({
     headers: { "content-type": "application/json" },
@@ -46,8 +71,8 @@ export async function POST(request: NextRequest) {
 }
 
 async function checkRateLimit(userEmail: string) {
-  // check if user has made a post in the last 6hrs
-  const onceEvery = 6 * 60 * 60 * 1000; // 6hrs in ms
+  // check if user has made a post in last x ms
+  const onceEvery = 30 * 60 * 1000; // 30m in ms
 
   const reports = await prisma.report.findMany({
     where: {
