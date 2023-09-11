@@ -7,6 +7,7 @@ import Image from "@/components/atomic/Image";
 import { useDebounce } from "@/components/hooks/debounce";
 import { initializeApollo } from "@/lib/apolloClient";
 import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 export default function ItemSearch({
   setSelectedItems: setSelectedFromProps,
@@ -103,7 +104,7 @@ export default function ItemSearch({
             return (
               <Row
                 item={item}
-                key={item.id}
+                key={uuidv4()}
                 toggleSelect={toggleSelect}
                 selectedItems={selectedItems}
               />
