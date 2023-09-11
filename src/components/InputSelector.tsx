@@ -112,15 +112,16 @@ export default function InputSelector({
     setSelectedFromProps?.(item);
   };
 
+  const labelStyle = (item: InputItem) =>
+    `px-1 opacity-80 ${selectedItem === item ? "bg-dark" : "bg-background"}`;
+
   return (
-    <div className="flex gap-2">
+    <div className="overscroll-bouncing overscroll-bouncing mb-2 flex min-w-full select-none  snap-x flex-nowrap gap-2 overflow-x-auto whitespace-nowrap">
       {items.map((item) => (
         <div
           key={item.itemId + item.count}
-          className={`relative h-[100px] w-[100px] cursor-pointer border  bg-foreground hover:border-primary ${
-            selectedItem === item
-              ? "border-primary text-primary"
-              : "border-text"
+          className={`relative h-[100px] w-[100px] shrink-0 cursor-pointer snap-start border  bg-foreground hover:border-primary ${
+            selectedItem === item ? "border-primary " : "border-text"
           }`}
           onClick={() => setSelectedItemAndPropagate(item)}
         >
@@ -133,10 +134,10 @@ export default function InputSelector({
               className="h-[100px] w-[100px] object-contain"
             />
           )}
-          <div className="absolute right-0 top-0 z-10 bg-dark px-1 opacity-80">
+          <div className={`absolute right-0 top-0 z-10 ${labelStyle(item)}`}>
             {item.name}
           </div>
-          <div className="absolute bottom-0 right-0 z-10 bg-dark px-1 opacity-80">
+          <div className={`absolute bottom-0 right-0 z-10 ${labelStyle(item)}`}>
             {item.value} ₽
           </div>
         </div>
