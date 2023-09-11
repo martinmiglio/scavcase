@@ -1,6 +1,7 @@
 "use client";
 
 import { gql } from "@/__generated__/gql";
+import { ItemsByNameQueryQuery } from "@/__generated__/graphql";
 import Button from "@/components/atomic/Button";
 import Image from "@/components/atomic/Image";
 import { useDebounce } from "@/components/hooks/debounce";
@@ -8,13 +9,10 @@ import { initializeApollo } from "@/lib/apolloClient";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-export interface SelectedItem {
-  id: string;
-  quantity?: number;
-  name?: string | null;
-  shortName?: string | null;
-  image512pxLink?: string | null;
-  avg24hPrice?: number | null;
+type APIItem = NonNullable<ItemsByNameQueryQuery["items"][0]>;
+
+export interface SelectedItem extends APIItem {
+  quantity: number;
 }
 
 export default function ItemSearch({
@@ -22,62 +20,59 @@ export default function ItemSearch({
 }: {
   setSelectedItems?: (items: SelectedItem[]) => void;
 }) {
-  const [items, setItemsState] = useState<SelectedItem[]>([]);
+  const [searchedItems, setSearchedItemsState] = useState<SelectedItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [search, debouncdedSearch, setSearch] = useDebounce("", 250);
 
   const apolloClient = initializeApollo();
 
-  const itemsByNameQuery = gql(`
-    query itemsByNameQuery($name: String) {
-      items(name: $name) {
-        id
-        name
-        shortName
-        image512pxLink
-        avg24hPrice
-      }
-    }
-  `);
-
   useEffect(() => {
-    const updateItemList = (items: SelectedItem[]) => {
-      const sortedItems = [
-        ...selectedItems,
-        ...items.filter((item) => item && !selectedItems.includes(item)),
-      ];
-      setItemsState(sortedItems);
-    };
-
     if (debouncdedSearch.length === 0) {
-      updateItemList([]);
+      setSearchedItemsState([]);
       return;
     }
 
     apolloClient
       .query({
-        query: itemsByNameQuery,
+        query: gql(`
+          query itemsByNameQuery($name: String) {
+            items(name: $name) {
+              id
+              name
+              shortName
+              image512pxLink
+              avg24hPrice
+            }
+          }
+        `),
         variables: {
           name: debouncdedSearch,
         },
       })
       .then((results) => {
-        const items = results.data.items.filter(
+        const apiItems = results.data.items.filter(
           (item) => item !== null,
-        ) as SelectedItem[];
-        updateItemList(items);
+        ) as APIItem[];
+
+        const items: SelectedItem[] = apiItems.map((item) => ({
+          ...item,
+          quantity: 1,
+        }));
+
+        setSearchedItemsState(items);
       });
-  }, [apolloClient, itemsByNameQuery, debouncdedSearch, selectedItems]);
+  }, [apolloClient, debouncdedSearch, selectedItems]);
+
+  const propegateSelectedItems = (items: SelectedItem[]) => {
+    setSelectedItems(items);
+    setSelectedFromProps?.(items);
+  };
 
   const toggleSelect = (item: SelectedItem) => {
-    if (selectedItems.includes(item)) {
-      const updatedItemList = selectedItems.filter((i) => i !== item);
-      setSelectedFromProps?.(updatedItemList);
-      setSelectedItems(updatedItemList);
+    if (!selectedItems.includes(item)) {
+      propegateSelectedItems([...selectedItems, item]);
     } else {
-      const updatedItemList = [...selectedItems, item];
-      setSelectedFromProps?.(updatedItemList);
-      setSelectedItems(updatedItemList);
+      propegateSelectedItems(selectedItems.filter((i) => i !== item));
     }
   };
 
@@ -99,7 +94,7 @@ export default function ItemSearch({
           Clear
         </Button>
       </span>
-      <table className="table-auto">
+      <table className="table-auto border-collapse">
         <thead className="sticky bg-dark">
           <tr>
             <th className="w-[90px]"></th>
@@ -109,7 +104,7 @@ export default function ItemSearch({
           </tr>
         </thead>
         <tbody>
-          {items?.map((item) => {
+          {selectedItems.map((item) => {
             if (!item) {
               return null;
             }
@@ -119,19 +114,36 @@ export default function ItemSearch({
                 key={uuidv4()}
                 toggleSelect={toggleSelect}
                 selected={selectedItems.includes(item)}
-                quantity={item.quantity}
                 setQuantity={(quantity) => {
-                  const updatedItemList = selectedItems.map((i) => {
-                    if (i === item) {
-                      return {
-                        ...i,
-                        quantity,
-                      };
-                    }
-                    return i;
-                  });
-                  setSelectedFromProps?.(updatedItemList);
-                  setSelectedItems(updatedItemList);
+                  item.quantity = quantity;
+                }}
+              />
+            );
+          })}
+        </tbody>
+        <tbody>
+          <tr
+            className={`sticky bg-dark ${
+              selectedItems.length > 0 ? "visible" : "hidden"
+            }`}
+          >
+            <th className="w-[90px]"></th>
+            <th>Name</th>
+            <th className="w-[90px]">Select</th>
+            <th className="w-[90px]">Quantity</th>
+          </tr>
+          {searchedItems.map((item) => {
+            if (!item) {
+              return null;
+            }
+            return (
+              <Row
+                item={item}
+                key={item.id}
+                toggleSelect={toggleSelect}
+                selected={selectedItems.includes(item)}
+                setQuantity={(quantity) => {
+                  item.quantity = quantity;
                 }}
               />
             );
@@ -146,17 +158,22 @@ function Row({
   item,
   selected,
   toggleSelect,
-  quantity,
-  setQuantity,
+  setQuantity: setQuantityFromProps,
 }: {
   item: SelectedItem;
   selected: boolean;
   toggleSelect: (item: SelectedItem) => void;
-  quantity?: number;
   setQuantity: (quantity: number) => void;
 }) {
+  const [quantity, setQuantity] = useState(item.quantity);
+
+  const propegateQuantity = (quantity: number) => {
+    setQuantityFromProps(quantity);
+    setQuantity(quantity);
+  };
+
   return (
-    <tr className="border-collapse">
+    <tr>
       <td className="border-y-4 border-dark">
         <Image
           src={item.image512pxLink ?? "https://via.placeholder.com/512"}
@@ -195,8 +212,10 @@ function Row({
           type="number"
           className="w-full border-2 border-primary bg-background p-2 disabled:text-foreground"
           disabled={!selected}
-          onChange={(e) => setQuantity(parseInt(e.target.value))}
-          value={quantity ?? 1}
+          onChange={(e) =>
+            propegateQuantity(Math.max(parseInt(e.target.value), 1))
+          }
+          value={quantity}
         />
       </td>
     </tr>
