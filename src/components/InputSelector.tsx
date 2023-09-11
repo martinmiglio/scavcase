@@ -11,7 +11,7 @@ export interface InputItem {
   itemId: string;
   count: number;
   name?: string;
-  value?: string;
+  value?: number;
   image?: string;
 }
 
@@ -100,7 +100,7 @@ export default function InputSelector({
             name: item.name,
             image: item.image,
             count: inputItems[index].count,
-            value: (item.value * inputItems[index].count).toString(),
+            value: item.value * inputItems[index].count,
           };
         }),
       );
