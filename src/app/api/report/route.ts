@@ -31,10 +31,9 @@ export async function POST(request: NextRequest) {
 
     if (!inputItem || !outputItems || !cost || !value || !patch) {
       return NextResponse.json(
-        {},
+        { message: "Missing fields" },
         {
           status: 400,
-          statusText: "Bad Request, missing fields",
         },
       );
     }
@@ -48,10 +47,9 @@ export async function POST(request: NextRequest) {
 
     if (!inputItemFromDB) {
       return NextResponse.json(
-        {},
+        { message: `Input item ${inputItem.itemId} not found` },
         {
-          status: 400,
-          statusText: "Bad Request, input item not found",
+          status: 404,
         },
       );
     }
@@ -90,11 +88,11 @@ export async function POST(request: NextRequest) {
       body: reportWithItems,
     });
   } catch (e) {
+    console.warn(JSON.stringify(e, null, 2));
     return NextResponse.json(
       {},
       {
-        status: 400,
-        statusText: "Bad Request",
+        status: 500,
       },
     );
   }
