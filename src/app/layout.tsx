@@ -13,7 +13,7 @@ const description = "Track and share scav case values in Escape from Tarkov";
 export const metadata: Metadata = {
   title: title,
   description: description,
-  icons: "icon?v2",
+  icons: "https://www.scavcase.watch/icon?v3",
   twitter: {
     card: "summary_large_image",
     title: title,
