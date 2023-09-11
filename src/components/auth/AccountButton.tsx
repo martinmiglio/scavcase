@@ -43,7 +43,7 @@ export default function AccountButton() {
   return (
     <div className="relative" ref={dropdownRef}>
       <div
-        className="m-2 h-8 w-8 cursor-pointer overflow-hidden rounded-full"
+        className="m-2 h-8 w-8 cursor-pointer overflow-hidden rounded-full border border-text"
         onClick={toggleDropdown}
       >
         <Image
@@ -57,8 +57,8 @@ export default function AccountButton() {
         />
       </div>
       <div
-        className={`transition-100 absolute right-0 z-20 flex flex-col divide-y overflow-hidden border-2 border-primary bg-background transition-colors ${
-          showDropdown ? "opacity-100" : "opacity-0"
+        className={`absolute right-0 z-20 flex flex-col divide-y overflow-hidden border-2 border-primary bg-background ${
+          showDropdown ? "" : "hidden"
         }`}
       >
         <span className="whitespace-nowrap p-2">
