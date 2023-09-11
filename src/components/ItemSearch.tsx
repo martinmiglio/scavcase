@@ -1,7 +1,6 @@
 "use client";
 
 import { gql } from "@/__generated__/gql";
-import { Item } from "@/__generated__/graphql";
 import Button from "@/components/atomic/Button";
 import Image from "@/components/atomic/Image";
 import { useDebounce } from "@/components/hooks/debounce";
@@ -9,13 +8,21 @@ import { initializeApollo } from "@/lib/apolloClient";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
+export interface ReturnItem {
+  id: string;
+  name?: string | null;
+  shortName?: string | null;
+  image512pxLink?: string | null;
+  avg24hPrice?: number | null;
+}
+
 export default function ItemSearch({
   setSelectedItems: setSelectedFromProps,
 }: {
-  setSelectedItems?: (items: Item[]) => void;
+  setSelectedItems?: (items: ReturnItem[]) => void;
 }) {
-  const [items, setItemsState] = useState<(Item | null)[]>([]);
-  const [selectedItems, setSelectedItems] = useState<Item[]>([]);
+  const [items, setItemsState] = useState<ReturnItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<ReturnItem[]>([]);
   const [search, debouncdedSearch, setSearch] = useDebounce("", 250);
 
   const apolloClient = initializeApollo();
@@ -23,6 +30,7 @@ export default function ItemSearch({
   const itemsByNameQuery = gql(`
     query itemsByNameQuery($name: String) {
       items(name: $name) {
+        id
         name
         shortName
         image512pxLink
@@ -32,7 +40,7 @@ export default function ItemSearch({
   `);
 
   useEffect(() => {
-    const updateItemList = (items: (Item | null)[]) => {
+    const updateItemList = (items: ReturnItem[]) => {
       const sortedItems = [
         ...selectedItems,
         ...items.filter((item) => item && !selectedItems.includes(item)),
@@ -53,20 +61,20 @@ export default function ItemSearch({
         },
       })
       .then((results) => {
-        updateItemList(results.data.items as (Item | null)[]);
+        const items = results.data.items.filter((item) => item !== null);
+        updateItemList(items as ReturnItem[]);
       });
   }, [apolloClient, itemsByNameQuery, debouncdedSearch, selectedItems]);
 
-  const propegateSelection = (items: Item[]) => {
-    setSelectedFromProps?.(items);
-    setSelectedItems(items);
-  };
-
-  const toggleSelect = (item: Item) => {
+  const toggleSelect = (item: ReturnItem) => {
     if (selectedItems.includes(item)) {
-      propegateSelection(selectedItems.filter((i) => i !== item));
+      const updatedItemList = selectedItems.filter((i) => i !== item);
+      setSelectedFromProps?.(updatedItemList);
+      setSelectedItems(updatedItemList);
     } else {
-      propegateSelection([...selectedItems, item]);
+      const updatedItemList = [...selectedItems, item];
+      setSelectedFromProps?.(updatedItemList);
+      setSelectedItems(updatedItemList);
     }
   };
 
@@ -121,9 +129,9 @@ function Row({
   selectedItems,
   toggleSelect,
 }: {
-  item: Item;
-  selectedItems: Item[];
-  toggleSelect: (item: Item) => void;
+  item: ReturnItem;
+  selectedItems: ReturnItem[];
+  toggleSelect: (item: ReturnItem) => void;
 }) {
   return (
     <tr className="border-collapse">
