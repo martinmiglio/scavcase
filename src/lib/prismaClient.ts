@@ -1,23 +1,19 @@
 import { PrismaClient } from "@prisma/client";
 
-let prismaClient: PrismaClient;
-
-function createPrismaClient() {
+const prismaClientSingleton = () => {
   return new PrismaClient();
-}
+};
 
-export function initializePrisma() {
-  const _prismaClient = prismaClient ?? createPrismaClient();
+type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>;
 
-  // For SSG and SSR always create a new Prisma Client
-  if (typeof window === "undefined") {
-    return createPrismaClient();
-  }
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClientSingleton | undefined;
+};
 
-  // Create the Prisma Client once in the client
-  if (!prismaClient) {
-    prismaClient = _prismaClient;
-  }
+const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
 
-  return _prismaClient;
+export default prisma;
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
 }

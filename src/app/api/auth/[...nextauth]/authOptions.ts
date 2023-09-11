@@ -1,4 +1,4 @@
-import { initializePrisma } from "@/lib/prismaClient";
+import prisma from "@/lib/prismaClient";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { AuthOptions } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
@@ -17,8 +17,6 @@ const schema = z.object({
 });
 
 const env = schema.parse(process.env);
-
-const prisma = initializePrisma();
 
 const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
