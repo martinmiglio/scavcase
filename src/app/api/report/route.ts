@@ -3,6 +3,13 @@ import prisma from "@/lib/prismaClient";
 import { Prisma } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+const envSchema = z.object({
+  CURRENT_GAME_PATCH: z.string(),
+});
+
+const env = envSchema.parse(process.env);
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession({
@@ -27,9 +34,9 @@ export async function POST(request: NextRequest) {
   }
   try {
     const body = await request.json();
-    let { inputItem, outputItems, cost, value, patch } = body;
+    let { inputItem, outputItems, cost, value } = body;
 
-    if (!inputItem || !outputItems || !cost || !value || !patch) {
+    if (!inputItem || !outputItems || !cost || !value) {
       return NextResponse.json(
         { message: "Missing fields" },
         {
@@ -58,7 +65,7 @@ export async function POST(request: NextRequest) {
       userEmail: user.email,
       cost,
       value,
-      patch,
+      patch: env.CURRENT_GAME_PATCH,
       inputItemId: inputItemFromDB.id,
     } satisfies Prisma.ReportCreateManyInput;
 
