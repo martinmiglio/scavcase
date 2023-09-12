@@ -66,6 +66,7 @@ export default function ReportInput() {
         <Button
           onClick={onSubmit}
           disabled={!inputItem || outputItems.length === 0 || submitting}
+          data-umami-event="Submit report button"
         >
           Submit
         </Button>
