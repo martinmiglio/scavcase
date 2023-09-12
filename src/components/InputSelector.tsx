@@ -94,7 +94,7 @@ export default function InputSelector({
     `px-1 opacity-80 ${selectedItem === item ? "bg-dark" : "bg-background"}`;
 
   return (
-    <div className="overscroll-bouncing flex h-32 min-w-full select-none snap-x flex-nowrap gap-2 overflow-x-auto overflow-y-clip whitespace-nowrap">
+    <div className="overscroll-bouncing flex h-34 min-w-full select-none snap-x flex-nowrap gap-2 overflow-x-auto overflow-y-clip whitespace-nowrap">
       {items.map((item) => (
         <div
           key={item.itemId + item.quantity}
