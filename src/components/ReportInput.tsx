@@ -1,9 +1,14 @@
 "use client";
 
 import InputSelector, { InputItem } from "@/components/InputSelector";
-import ItemSearch, { SelectedItem } from "@/components/ItemSearch";
+import { SelectedItem } from "@/components/ItemSearch";
 import Button from "@/components/atomic/Button";
+import dynamic from "next/dynamic";
 import { useState } from "react";
+
+const ItemSearch = dynamic(() => import("@/components/ItemSearch"), {
+  ssr: false,
+});
 
 export default function ReportInput() {
   const [inputItem, setInputItem] = useState<InputItem | null>(null);

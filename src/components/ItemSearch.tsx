@@ -1,7 +1,7 @@
 "use client";
 
 import { gql } from "@/__generated__/gql";
-import { ItemsByNameQueryQuery } from "@/__generated__/graphql";
+import { ItemsByNameLimitedQuery } from "@/__generated__/graphql";
 import Button from "@/components/atomic/Button";
 import Image from "@/components/atomic/Image";
 import { useDebounce } from "@/components/hooks/debounce";
@@ -9,7 +9,7 @@ import { initializeApollo } from "@/lib/apolloClient";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-type APIItem = NonNullable<ItemsByNameQueryQuery["items"][0]>;
+type APIItem = NonNullable<ItemsByNameLimitedQuery["items"][0]>;
 
 export interface SelectedItem extends APIItem {
   quantity: number;
@@ -21,22 +21,28 @@ export default function ItemSearch({
   setSelectedItems?: (items: SelectedItem[]) => void;
 }) {
   const [searchedItems, setSearchedItemsState] = useState<SelectedItem[]>([]);
+  const [hasMoreSearchedItems, setHasMoreSearchedItems] =
+    useState<boolean>(true);
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
-  const [search, debouncdedSearch, setSearch] = useDebounce("", 250);
+  const [search, debouncdedSearch, setSearch] = useDebounce("", 400);
 
-  const apolloClient = initializeApollo();
+  const pageLength = 10;
 
-  useEffect(() => {
-    if (debouncdedSearch.length === 0) {
-      setSearchedItemsState([]);
-      return;
+  const getItemsByName = async (
+    name: string,
+    limit: number,
+    offset: number,
+  ) => {
+    if (name.length === 0) {
+      return [];
     }
 
-    apolloClient
-      .query({
-        query: gql(`
-          query itemsByNameQuery($name: String) {
-            items(name: $name) {
+    const apolloClient = initializeApollo();
+
+    const results = await apolloClient.query({
+      query: gql(`
+          query itemsByNameLimited($name: String, $limit: Int, $offset: Int) {
+            items(name: $name, limit: $limit, offset: $offset) {
               id
               name
               shortName
@@ -45,23 +51,38 @@ export default function ItemSearch({
             }
           }
         `),
-        variables: {
-          name: debouncdedSearch,
-        },
-      })
-      .then((results) => {
-        const apiItems = results.data.items.filter(
-          (item) => item !== null,
-        ) as APIItem[];
+      variables: {
+        name: name,
+        limit: limit,
+        offset: offset,
+      },
+    });
 
-        const items: SelectedItem[] = apiItems.map((item) => ({
-          ...item,
-          quantity: 1,
-        }));
+    const apiItems = results.data.items.filter(
+      (item) => item !== null,
+    ) as APIItem[];
 
-        setSearchedItemsState(items);
-      });
-  }, [apolloClient, debouncdedSearch, selectedItems]);
+    const items: SelectedItem[] = apiItems.map((item) => ({
+      ...item,
+      quantity: 1,
+      selected: false,
+    }));
+
+    return items;
+  };
+
+  useEffect(() => {
+    if (debouncdedSearch.length === 0) {
+      setSearchedItemsState([]);
+      setHasMoreSearchedItems(false);
+      return;
+    }
+
+    getItemsByName(debouncdedSearch, pageLength, 0).then((items) => {
+      setHasMoreSearchedItems(items.length >= pageLength);
+      setSearchedItemsState(items);
+    });
+  }, [debouncdedSearch]);
 
   const propegateSelectedItems = (items: SelectedItem[]) => {
     setSelectedItems(items);
@@ -71,10 +92,29 @@ export default function ItemSearch({
   const toggleSelect = (item: SelectedItem) => {
     if (!selectedItems.includes(item)) {
       propegateSelectedItems([...selectedItems, item]);
+      setSearchedItemsState(searchedItems.filter((i) => i !== item));
     } else {
       propegateSelectedItems(selectedItems.filter((i) => i !== item));
+      if (debouncdedSearch.length !== 0) {
+        setSearchedItemsState([item, ...searchedItems]);
+      }
     }
   };
+
+  const renderRow = (item: SelectedItem) => (
+    <Row
+      item={item}
+      key={uuidv4()}
+      toggleSelect={toggleSelect}
+      selected={
+        selectedItems.find((selectedItem) => selectedItem.id === item.id) !==
+        undefined
+      }
+      setQuantity={(quantity) => {
+        item.quantity = quantity;
+      }}
+    />
+  );
 
   return (
     <div className="flex w-full flex-col gap-2">
@@ -94,7 +134,10 @@ export default function ItemSearch({
           Clear
         </Button>
       </span>
-      <table className="table-auto border-collapse">
+      <table
+        className="table-auto border-collapse"
+        suppressHydrationWarning={true}
+      >
         <thead className="sticky bg-dark">
           <tr>
             <th className="w-[90px]"></th>
@@ -103,54 +146,86 @@ export default function ItemSearch({
             <th className="w-[90px]">Quantity</th>
           </tr>
         </thead>
-        <tbody>
-          {selectedItems.map((item) => {
-            if (!item) {
-              return null;
-            }
-            return (
-              <Row
-                item={item}
-                key={uuidv4()}
-                toggleSelect={toggleSelect}
-                selected={selectedItems.includes(item)}
-                setQuantity={(quantity) => {
-                  item.quantity = quantity;
-                }}
-              />
-            );
-          })}
-        </tbody>
-        <tbody>
-          <tr
-            className={`sticky bg-dark ${
-              selectedItems.length > 0 ? "visible" : "hidden"
-            }`}
-          >
+        <IniniteTableBody
+          row={renderRow}
+          loadMore={async (p) => {}}
+          hasMore={false}
+          items={selectedItems}
+          hasHeader={false}
+        />
+        <IniniteTableBody
+          row={renderRow}
+          loadMore={(page) =>
+            getItemsByName(search, pageLength, page * pageLength).then(
+              (items) => {
+                if (items.length < pageLength) {
+                  setHasMoreSearchedItems(false);
+                }
+                setSearchedItemsState([...searchedItems, ...items]);
+              },
+            )
+          }
+          hasMore={hasMoreSearchedItems}
+          items={searchedItems}
+          hasHeader={selectedItems.length > 0}
+        />
+      </table>
+    </div>
+  );
+}
+
+function IniniteTableBody({
+  row,
+  items,
+  loadMore,
+  hasMore,
+  hasHeader,
+}: {
+  row: (item: SelectedItem) => React.JSX.Element;
+  items: SelectedItem[];
+  loadMore: (page: number) => Promise<void>;
+  hasMore: boolean;
+  hasHeader: boolean;
+}) {
+  const [page, setPage] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const handleLoadMore = async () => {
+    setLoading(true);
+    await loadMore(page);
+    setLoading(false);
+    setPage(page + 1);
+  };
+
+  return (
+    <>
+      <tbody>
+        {hasHeader && (
+          <tr className="sticky bg-dark">
             <th className="w-[90px]"></th>
             <th>Name</th>
             <th className="w-[90px]">Select</th>
             <th className="w-[90px]">Quantity</th>
           </tr>
-          {searchedItems.map((item) => {
-            if (!item) {
-              return null;
-            }
-            return (
-              <Row
-                item={item}
-                key={item.id}
-                toggleSelect={toggleSelect}
-                selected={selectedItems.includes(item)}
-                setQuantity={(quantity) => {
-                  item.quantity = quantity;
-                }}
-              />
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+        )}
+        {items.map((item) => {
+          if (!item) {
+            return null;
+          }
+          return row(item);
+        })}
+        {hasMore && (
+          <tr>
+            <td></td>
+            <td align="center">
+              <Button onClick={handleLoadMore} disabled={loading}>
+                Load more...
+              </Button>
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </>
   );
 }
 
