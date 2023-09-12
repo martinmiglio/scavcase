@@ -94,11 +94,11 @@ export default function InputSelector({
     `px-1 opacity-80 ${selectedItem === item ? "bg-dark" : "bg-background"}`;
 
   return (
-    <div className="overscroll-bouncing overscroll-bouncing mb-2 flex min-w-full select-none  snap-x flex-nowrap gap-2 overflow-x-auto whitespace-nowrap">
+    <div className="overscroll-bouncing flex h-32 min-w-full select-none snap-x flex-nowrap gap-2 overflow-x-auto overflow-y-clip whitespace-nowrap">
       {items.map((item) => (
         <div
           key={item.itemId + item.quantity}
-          className={`relative h-[100px] w-[100px] shrink-0 cursor-pointer snap-start border  bg-foreground hover:border-primary ${
+          className={`relative h-32 w-32 shrink-0 cursor-pointer snap-start border  bg-foreground hover:border-primary ${
             selectedItem === item ? "border-primary " : "border-text"
           }`}
           onClick={() => setSelectedItemAndPropagate(item)}
@@ -109,7 +109,7 @@ export default function InputSelector({
               alt={item.name ?? "Item"}
               height={128}
               width={128}
-              className="h-[100px] w-[100px] object-contain"
+              className="h-32 w-32 object-contain"
             />
           )}
           <div className={`absolute right-0 top-0 z-10 ${labelStyle(item)}`}>
