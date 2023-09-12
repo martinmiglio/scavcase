@@ -6,6 +6,14 @@ import NavBar from "@/components/page/NavBar";
 import { font } from "@/styles/fonts";
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
+import Script from "next/script";
+import { z } from "zod";
+
+const schema = z.object({
+  ANALYTICS_ID: z.string().optional(),
+  ANALYTICS_URL: z.string().optional(),
+});
+const env = schema.parse(process.env);
 
 const title = "scavcase.watch";
 const description = "Track and share scav case values in Escape from Tarkov";
@@ -47,6 +55,15 @@ export default async function RootLayout({
       lang="en"
       className="pattern-size-12 bg-background text-text pattern-checkered pattern-checkered-background2/100 pattern-checkered-scale-[5]"
     >
+      <head>
+        {env.ANALYTICS_URL && env.ANALYTICS_ID && (
+          <Script
+            async
+            src={env.ANALYTICS_URL}
+            data-website-id={env.ANALYTICS_ID}
+          />
+        )}
+      </head>
       <AuthSessionProvider session={session}>
         <body className={font.className}>
           <NavBar title={metadata.title?.toString() ?? ""} />
