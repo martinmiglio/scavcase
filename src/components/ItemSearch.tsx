@@ -46,7 +46,7 @@ export default function ItemSearch({
               id
               name
               shortName
-              image512pxLink
+              iconLink
               avg24hPrice
             }
           }
@@ -249,25 +249,21 @@ function Row({
 
   return (
     <tr>
-      <td className="border-y-4 border-dark">
+      <td>
         <Image
-          src={item.image512pxLink ?? "https://via.placeholder.com/512"}
+          src={item.iconLink ?? "https://via.placeholder.com/64"}
           alt={item.name ?? "Item"}
-          height={128}
-          width={128}
-          className="mx-auto my-2 h-[70px] w-[70px] border border-text bg-foreground object-contain"
+          height={64}
+          width={64}
+          className="mx-auto my-2 h-16 w-16 bg-foreground object-contain"
         />
       </td>
-      <td className="border-y-4 border-dark">{item.name}</td>
-      <td
-        align="center"
-        className="border-y-4 border-dark"
-        onClick={() => toggleSelect(item)}
-      >
+      <td>{item.name}</td>
+      <td align="center" onClick={() => toggleSelect(item)}>
         <div className="relative flex w-7">
           <input
             type="checkbox"
-            className="transition-100 peer h-7 w-7 shrink-0 appearance-none border-2 border-primary transition-colors checked:bg-primary"
+            className="transition-100 peer h-7 w-7 shrink-0 cursor-pointer appearance-none border-2 border-primary transition-colors  checked:bg-primary"
             checked={selected}
             onChange={() => {}} // noop
           />
@@ -282,10 +278,10 @@ function Row({
           </svg>
         </div>
       </td>
-      <td className="border-y-4 border-dark">
+      <td>
         <input
           type="number"
-          className="w-full border-2 border-primary bg-background p-2 disabled:text-foreground"
+          className="w-full border-2 border-primary bg-dark p-2 disabled:cursor-not-allowed disabled:bg-background disabled:text-foreground"
           disabled={!selected}
           onChange={(e) =>
             propegateQuantity(Math.max(parseInt(e.target.value), 1))
