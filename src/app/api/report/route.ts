@@ -7,6 +7,7 @@ import { z } from "zod";
 
 const envSchema = z.object({
   CURRENT_GAME_PATCH: z.string(),
+  NEXT_PUBLIC_REPORT_RATE_LIMIT: z.string(),
 });
 
 const env = envSchema.parse(process.env);
@@ -23,15 +24,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  if (await checkRateLimit(user.email)) {
+  const timeRemaining = await getTimeLeft(user.email);
+
+  if (timeRemaining > 0) {
     return NextResponse.json(
       {},
       {
         status: 429,
         statusText: "Too Many Requests",
+        headers: { "retry-after": timeRemaining.toString() },
       },
     );
   }
+
   try {
     const body = await request.json();
     let { inputItem, outputItems, cost, value } = body;
@@ -105,22 +110,31 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function checkRateLimit(userEmail: string) {
+async function getTimeLeft(userEmail: string): Promise<number> {
   if (process.env.NODE_ENV === "development") {
-    return false;
+    return 0;
   }
 
-  // check if user has made a post in last x ms
-  const onceEvery = 30 * 60 * 1000; // 30m in ms
+  const rateLimitPeriod =
+    parseFloat(env.NEXT_PUBLIC_REPORT_RATE_LIMIT) * 60 * 1000;
 
   const reports = await prisma.report.findMany({
     where: {
       userEmail,
       createdAt: {
-        gte: new Date(Date.now() - onceEvery),
+        gte: new Date(Date.now() - rateLimitPeriod),
       },
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
 
-  return reports.length > 0;
+  if (reports.length == 0) {
+    return 0;
+  }
+
+  const lastReport = reports[0];
+  const timeSinceLastReport = Date.now() - lastReport.createdAt.getTime();
+  return rateLimitPeriod - timeSinceLastReport;
 }
