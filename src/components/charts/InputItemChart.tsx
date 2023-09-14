@@ -1,7 +1,7 @@
 import DoughnutChart from "@/components/charts/Doughnut";
 import prisma from "@/lib/prismaClient";
 import { getItemsByIds } from "@/queries/items";
-import { ChartData } from "chart.js";
+import { ChartData, ChartOptions } from "chart.js";
 
 export default async function InputItemChart() {
   try {
@@ -42,7 +42,22 @@ export default async function InputItemChart() {
       ],
     };
 
-    return <DoughnutChart chartData={chartData} />;
+    const chartOptions: ChartOptions = {
+      plugins: {
+        title: {
+          display: true,
+          text: "Number of Reports per Input Item",
+          font: {
+            size: 24,
+          },
+        },
+        legend: {
+          position: "bottom",
+        },
+      },
+    };
+
+    return <DoughnutChart chartData={chartData} options={chartOptions} />;
   } catch (e) {
     console.log(e);
     return <pre>{JSON.stringify(e, null, 2)}</pre>;
