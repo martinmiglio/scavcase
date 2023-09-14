@@ -23,6 +23,26 @@ export async function getItemById(id: string) {
   });
 }
 
+export async function getItemsByIds(ids: string[]) {
+  return apolloClient.query({
+    query: gql(`
+      query itemsByIds($ids: [ID]) {
+        items(ids: $ids) {
+          id
+          name
+          shortName
+          iconLink
+          image512pxLink
+          avg24hPrice
+        }
+      }
+    `),
+    variables: {
+      ids: ids,
+    },
+  });
+}
+
 export async function getItemsByName(
   name: string,
   limit: number = -1,
