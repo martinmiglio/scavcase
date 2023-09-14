@@ -54,18 +54,19 @@ export function makeHueRotationSteps(
   format: "hex" | "rgb" | "rgba" | "color" | undefined = "hex",
 ) {
   // instead of doing below, just return 5 hex colors:
-  return ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"];
+  // return ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"];
 
-  // const color1 = new Color(color).to("hsl");
+  const color1 = new Color(color).to("hsl");
 
-  // const startingHue = color1.hwb.h;
+  const startingHue = color1.hwb.h;
 
-  // const list = [];
-  // for (let i = steps; i >= 0; i--) {
-  //   const hue = (startingHue + (i / steps) * totalRotation) % 360;
-  //   color1.hwb[0] = hue;
-  //   list.push(color1.toString({ format: format }));
-  // }
+  const list = [];
+  for (let i = steps; i >= 0; i--) {
+    const hue = (startingHue + (i / steps) * totalRotation) % 360;
+    color1.hwb[0] = hue;
+    list.push(color1.toString({ format: format }));
+  }
 
-  // return list;
+  console.log(list)
+  return list;
 }
