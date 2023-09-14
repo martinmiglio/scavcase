@@ -35,7 +35,11 @@ export default function AccountButton() {
   const signedIn = session && session.status === "authenticated";
 
   if (!signedIn) {
-    return <Button onClick={() => signIn()} data-umami-event="Signin button">Sign In</Button>;
+    return (
+      <Button onClick={() => signIn()} data-umami-event="Signin button">
+        Sign In
+      </Button>
+    );
   }
 
   const { user } = session.data;

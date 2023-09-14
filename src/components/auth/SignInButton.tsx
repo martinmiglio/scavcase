@@ -25,7 +25,7 @@ export default function SignInButton({
   return (
     <Button
       onClick={() => signIn(provider.id)}
-      className="mx-auto flex w-full max-w-sm min-w-fit items-center justify-center gap-2"
+      className="mx-auto flex w-full min-w-fit max-w-sm items-center justify-center gap-2"
     >
       <FontAwesomeIcon icon={deviceIcon} className="h-6 w-6" />
       <div className="flex-1">Sign in with {provider.name}</div>
