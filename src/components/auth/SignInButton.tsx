@@ -26,6 +26,8 @@ export default function SignInButton({
     <Button
       onClick={() => signIn(provider.id)}
       className="mx-auto flex w-full min-w-fit max-w-sm items-center justify-center gap-2"
+      data-umami-event="Signin with provider button"
+      data-umami-event-provider={provider.name}
     >
       <FontAwesomeIcon icon={deviceIcon} className="h-6 w-6" />
       <div className="flex-1">Sign in with {provider.name}</div>
