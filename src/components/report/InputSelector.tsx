@@ -1,10 +1,8 @@
 "use client";
 
 import Image from "@/components/atomic/Image";
-import { initializeApollo } from "@/lib/apolloClient";
 import { ItemByIdQuery } from "@/queries/__generated__/graphql";
-import { getItemById } from "@/queries/items";
-import { ApolloQueryResult } from "@apollo/client";
+import { getItemsByIds } from "@/queries/items";
 import { useEffect, useState } from "react";
 
 export interface InputItem {
@@ -23,50 +21,49 @@ export default function InputSelector({
   const [selectedItem, setSelectedItem] = useState<InputItem | null>(null);
   const [items, setItemsState] = useState<InputItem[]>([]);
 
-  const apolloClient = initializeApollo();
+  const getInputItems = async () => {
+    const res = await fetch("/api/report/inputs");
+    const inputItems = await res.json();
 
-  useEffect(() => {
-    fetch("/api/report/inputs").then((res) =>
-      res.json().then((inputItems) => {
-        if (!inputItems) {
-          return;
-        }
+    if (!inputItems) {
+      return;
+    }
 
-        const requests: Promise<ApolloQueryResult<ItemByIdQuery>>[] = [];
-        // for every input item, make item request by name to get value and image
-        inputItems.forEach((item: InputItem) => {
-          requests.push(getItemById(item.itemId));
-        });
+    const queryRes = await getItemsByIds(
+      inputItems.map((item: { itemId: string }) => item.itemId),
+    );
 
-        // wait for all requests to finish
-        Promise.all(requests).then((results) => {
-          // each result is a single item
-          const newItems = results.map((result) => {
-            const { item } = result.data;
-            return {
-              id: item?.id ?? "",
-              name: item?.shortName ?? "",
-              value: item?.avg24hPrice === 0 ? 1 : item?.avg24hPrice ?? 1,
-              image: item?.image512pxLink ?? "",
-            };
-          });
+    const { items } = queryRes.data;
 
-          // set items state, but multiply value by count
-          setItemsState(
-            newItems.map((item, index) => {
-              return {
-                itemId: item.id,
-                name: item.name,
-                image: item.image,
-                quantity: inputItems[index].quantity,
-                value: item.value * inputItems[index].quantity,
-              };
-            }),
-          );
-        });
+    const nonNullItems = items.filter((item) => item !== null) as NonNullable<
+      ItemByIdQuery["item"]
+    >[];
+
+    setItemsState(
+      inputItems.map((item: { itemId: string; quantity: number }) => {
+        const apiItem = nonNullItems.find(
+          (apiItem: { id: string }) => item.itemId === apiItem.id,
+        );
+
+        const quantity = item?.quantity ?? 1;
+        const value =
+          (apiItem?.avg24hPrice === 0 ? 1 : apiItem?.avg24hPrice ?? 1) *
+          quantity;
+
+        return {
+          itemId: item?.itemId ?? "",
+          name: apiItem?.shortName ?? "",
+          image: apiItem?.image512pxLink ?? "",
+          value: value,
+          quantity: quantity,
+        } as InputItem;
       }),
     );
-  }, [apolloClient]);
+  };
+
+  useEffect(() => {
+    getInputItems();
+  }, []);
 
   const setSelectedItemAndPropagate = (item: InputItem) => {
     setSelectedItem(item);
