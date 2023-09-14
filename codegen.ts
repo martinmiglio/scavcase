@@ -2,9 +2,9 @@ import { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
   schema: "https://api.tarkov.dev/graphql",
-  documents: ["src/**/*.tsx"],
+  documents: ["src/queries/**/*.ts"],
   generates: {
-    "./src/__generated__/": {
+    "./src/queries/__generated__/": {
       preset: "client",
       plugins: [],
       presetConfig: {

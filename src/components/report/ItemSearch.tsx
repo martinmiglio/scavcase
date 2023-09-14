@@ -1,15 +1,14 @@
 "use client";
 
-import { gql } from "@/__generated__/gql";
-import { ItemsByNameLimitedQuery } from "@/__generated__/graphql";
 import Button from "@/components/atomic/Button";
 import Image from "@/components/atomic/Image";
 import { useDebounce } from "@/components/hooks/debounce";
-import { initializeApollo } from "@/lib/apolloClient";
+import { ItemsByNameQuery } from "@/queries/__generated__/graphql";
+import { getItemsByName as getItemsByNameQuery } from "@/queries/items";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-type APIItem = NonNullable<ItemsByNameLimitedQuery["items"][0]>;
+type APIItem = NonNullable<ItemsByNameQuery["items"][0]>;
 
 export interface SelectedItem extends APIItem {
   quantity: number;
@@ -37,29 +36,10 @@ export default function ItemSearch({
       return [];
     }
 
-    const apolloClient = initializeApollo();
-
-    const results = await apolloClient.query({
-      query: gql(`
-          query itemsByNameLimited($name: String, $limit: Int, $offset: Int) {
-            items(name: $name, limit: $limit, offset: $offset) {
-              id
-              name
-              shortName
-              iconLink
-              avg24hPrice
-            }
-          }
-        `),
-      variables: {
-        name: name,
-        limit: limit,
-        offset: offset,
-      },
-    });
+    const results = await getItemsByNameQuery(name, limit, offset);
 
     const apiItems = results.data.items.filter(
-      (item) => item !== null,
+      (item: any) => item !== null,
     ) as APIItem[];
 
     const items: SelectedItem[] = apiItems.map((item) => ({

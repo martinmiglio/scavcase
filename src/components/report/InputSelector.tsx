@@ -1,9 +1,9 @@
 "use client";
 
-import { gql } from "@/__generated__/gql";
-import { GetItemValueQuery } from "@/__generated__/graphql";
 import Image from "@/components/atomic/Image";
 import { initializeApollo } from "@/lib/apolloClient";
+import { ItemByIdQuery } from "@/queries/__generated__/graphql";
+import { getItemById } from "@/queries/items";
 import { ApolloQueryResult } from "@apollo/client";
 import { useEffect, useState } from "react";
 
@@ -32,27 +32,10 @@ export default function InputSelector({
           return;
         }
 
-        const requests: Promise<ApolloQueryResult<GetItemValueQuery>>[] = [];
+        const requests: Promise<ApolloQueryResult<ItemByIdQuery>>[] = [];
         // for every input item, make item request by name to get value and image
-        inputItems.forEach((item: { itemId: any }) => {
-          requests.push(
-            apolloClient.query({
-              query: gql(`
-                query getItemValue($id: ID!) {
-                  item(id: $id) {
-                    id
-                    name
-                    shortName
-                    image512pxLink
-                    avg24hPrice
-                  }
-                }
-              `),
-              variables: {
-                id: item.itemId,
-              },
-            }),
-          );
+        inputItems.forEach((item: InputItem) => {
+          requests.push(getItemById(item.itemId));
         });
 
         // wait for all requests to finish
@@ -94,7 +77,7 @@ export default function InputSelector({
     `px-1 opacity-80 ${selectedItem === item ? "bg-dark" : "bg-background"}`;
 
   return (
-    <div className="overscroll-bouncing flex h-34 min-w-full select-none snap-x flex-nowrap gap-2 overflow-x-auto overflow-y-clip whitespace-nowrap">
+    <div className="overscroll-bouncing h-34 flex min-w-full select-none snap-x flex-nowrap gap-2 overflow-x-auto overflow-y-clip whitespace-nowrap">
       {items.map((item) => (
         <div
           key={item.itemId + item.quantity}
