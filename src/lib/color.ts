@@ -60,5 +60,5 @@ export function makeHueRotationSteps(
   return Array.from({ length: steps }, (_, i) => {
     color1.hwb.h = (startingHue + (i / steps) * totalRotation) % 360;
     return color1.toString({ format: format });
-  }).toReversed();
+  }).reverse();
 }
