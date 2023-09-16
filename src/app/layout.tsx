@@ -61,6 +61,7 @@ export default async function RootLayout({
             async
             src={env.ANALYTICS_URL}
             data-website-id={env.ANALYTICS_ID}
+            data-domains="scavcase.watch,www.scavcase.watch"
           />
         )}
       </head>
