@@ -36,7 +36,7 @@ export default async function InputItemChart() {
       }),
       datasets: [
         {
-          label: "Number of Items",
+          label: "Number of Reports",
           data: data.map((item) => item.Report.length),
         },
       ],
