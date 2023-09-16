@@ -9,11 +9,11 @@ import { v4 as uuidv4 } from "uuid";
 
 const { colors } = config.theme;
 
-function DoughnutChart({
+function ScatterChart({
   chartData,
   options,
 }: {
-  chartData: ChartData<"doughnut", number[], unknown>;
+  chartData: ChartData<"scatter", { x: number; y: number }[], unknown>;
   options?: ChartOptions;
 }) {
   Chart.defaults.font.family = font.style.fontFamily;
@@ -21,11 +21,11 @@ function DoughnutChart({
   Chart.defaults.color = colors.text;
 
   chartData.datasets = chartData.datasets.map((dataset) => ({
-    backgroundColor: makeHueRotationSteps(
-      dataset.data.length,
-      colors.primary,
-      100,
-    ),
+    // backgroundColor: makeHueRotationSteps(
+    //   dataset.data.length,
+    //   colors.primary,
+    //   100,
+    // ),
     ...dataset,
   }));
 
@@ -40,7 +40,7 @@ function DoughnutChart({
       return;
     }
     const _ = new Chart(ctx, {
-      type: "doughnut",
+      type: "scatter",
       data: chartData,
       options: {
         maintainAspectRatio: false,
@@ -58,4 +58,4 @@ function DoughnutChart({
     </div>
   );
 }
-export default DoughnutChart;
+export default ScatterChart;
