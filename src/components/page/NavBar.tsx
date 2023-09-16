@@ -20,7 +20,15 @@ export default function NavBar({ title }: { title: string }) {
           <h1 className="text-3xl font-bold">{title}</h1>
         </header>
       </Link>
-      <AccountButton />
+      <span className="flex items-center gap-6">
+        <Link href="/about" className="hover:text-primary hover:underline">
+          About
+        </Link>
+        <Link href="/report" className="hover:text-primary hover:underline">
+          New Report
+        </Link>
+        <AccountButton />
+      </span>
     </nav>
   );
 }
