@@ -7,7 +7,7 @@ const ICON_SIZE = 50;
 
 export default function NavBar({ title }: { title: string }) {
   return (
-    <nav className="relative mb-2 flex w-full justify-between bg-background px-4 py-2 shadow-lg">
+    <nav className="relative mb-2 flex w-full flex-col justify-between bg-background px-4 py-2 shadow-lg sm:flex-row">
       <Link href="/">
         <header className="flex items-center gap-2">
           <Image
