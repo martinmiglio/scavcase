@@ -21,12 +21,13 @@ const description = "Track and share scav case values in Escape from Tarkov";
 export const metadata: Metadata = {
   title: title,
   description: description,
-  icons: "https://www.scavcase.watch/icon?v3",
+  metadataBase: new URL("https://www.scavcase.watch/"),
+  icons: "/icon?v3",
   twitter: {
     card: "summary_large_image",
     title: title,
     description: description,
-    images: ["https://www.scavcase.watch/og?v4"],
+    images: ["/og?v4"],
   },
   openGraph: {
     type: "website",
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
     siteName: title,
     images: [
       {
-        url: "https://www.scavcase.watch/og?v4",
+        url: "/og?v4",
         width: 1200,
         height: 630,
       },
