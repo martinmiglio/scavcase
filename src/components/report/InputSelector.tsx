@@ -2,7 +2,7 @@
 
 import Image from "@/components/atomic/Image";
 import { ItemByIdQuery } from "@/queries/__generated__/graphql";
-import { getItemsByIds } from "@/queries/items";
+import { getItemsByIds } from "@/queries/apiItems";
 import { useEffect, useState } from "react";
 
 export interface InputItem {

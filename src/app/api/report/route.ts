@@ -1,5 +1,13 @@
 import authOptions from "@/app/api/auth/[...nextauth]/authOptions";
-import prisma from "@/lib/prismaClient";
+import {
+  createOutputItems,
+  getInputItemByItemIdAndQuanity,
+} from "@/queries/dbItems";
+import {
+  createReport,
+  getReportById,
+  getReportsByEmailAfterDate,
+} from "@/queries/reports";
 import { Prisma } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
 import { NextRequest, NextResponse } from "next/server";
@@ -50,12 +58,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const inputItemFromDB = await prisma.inputItem.findFirst({
-      where: {
-        itemId: inputItem.itemId,
-        quantity: inputItem.quantity,
-      },
-    });
+    const inputItemFromDB = await getInputItemByItemIdAndQuanity(
+      inputItem.itemId,
+      inputItem.quantity,
+    );
 
     if (!inputItemFromDB) {
       return NextResponse.json(
@@ -74,7 +80,7 @@ export async function POST(request: NextRequest) {
       inputItemId: inputItemFromDB.id,
     } satisfies Prisma.ReportCreateManyInput;
 
-    const createdReport = await prisma.report.create({ data: report });
+    const createdReport = await createReport(report);
 
     const validOutputItems = outputItems.map(
       (item: { itemId: string; quantity: number }) => {
@@ -86,13 +92,11 @@ export async function POST(request: NextRequest) {
       },
     ) as Prisma.OutputItemCreateManyInput | Prisma.OutputItemCreateManyInput[];
 
-    await prisma.outputItem.createMany({
-      data: validOutputItems,
-    });
+    await createOutputItems(validOutputItems);
 
-    const reportWithItems = await prisma.report.findUnique({
-      where: { id: createdReport.id },
-      include: { inputItem: true, outputItems: true },
+    const reportWithItems = await getReportById(createdReport.id, {
+      inputItem: true,
+      outputItems: true,
     });
 
     return NextResponse.json({
@@ -118,17 +122,10 @@ async function getTimeLeft(userEmail: string): Promise<number> {
   const rateLimitPeriod =
     parseFloat(env.NEXT_PUBLIC_REPORT_RATE_LIMIT) * 60 * 1000;
 
-  const reports = await prisma.report.findMany({
-    where: {
-      userEmail,
-      createdAt: {
-        gte: new Date(Date.now() - rateLimitPeriod),
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const reports = await getReportsByEmailAfterDate(
+    userEmail,
+    new Date(Date.now() - rateLimitPeriod),
+  );
 
   if (reports.length == 0) {
     return 0;

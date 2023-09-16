@@ -1,22 +1,20 @@
 import DoughnutChart from "@/components/charts/Doughnut";
-import prisma from "@/lib/prismaClient";
-import { getItemsByIds } from "@/queries/items";
+import { getItemsByIds } from "@/queries/apiItems";
+import { getAllInputItemsWithReports } from "@/queries/dbItems";
 import { ChartData, ChartOptions } from "chart.js";
 
 export default async function InputItemChart() {
   try {
-    const inputItems = await prisma.inputItem.findMany({
-      select: {
+    const inputItems = await getAllInputItemsWithReports(
+      {
         id: true,
         itemId: true,
         quantity: true,
-        Report: {
-          select: {
-            id: true,
-          },
-        },
       },
-    });
+      {
+        id: true,
+      },
+    );
 
     const queryRes = await getItemsByIds(inputItems.map((item) => item.itemId));
 

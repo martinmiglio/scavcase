@@ -4,7 +4,7 @@ import Button from "@/components/atomic/Button";
 import Image from "@/components/atomic/Image";
 import { useDebounce } from "@/components/hooks/debounce";
 import { ItemsByNameQuery } from "@/queries/__generated__/graphql";
-import { getItemsByName as getItemsByNameQuery } from "@/queries/items";
+import { getItemsByName as getItemsByNameQuery } from "@/queries/apiItems";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 

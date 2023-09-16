@@ -1,9 +1,12 @@
 import { gql } from "./__generated__/gql";
 import { initializeApollo } from "@/lib/apolloClient";
+import { cache } from "react";
+
+export const revalidate = 2.5 * 60; // 2.5 minutes (tarkov.dev api cache is 5 minutes)
 
 const apolloClient = initializeApollo();
 
-export async function getItemById(id: string) {
+export const getItemById = cache(async (id: string) => {
   return apolloClient.query({
     query: gql(`
       query itemById($id: ID) {
@@ -21,9 +24,9 @@ export async function getItemById(id: string) {
       id: id,
     },
   });
-}
+});
 
-export async function getItemsByIds(ids: string[]) {
+export const getItemsByIds = cache(async (ids: string[]) => {
   return apolloClient.query({
     query: gql(`
       query itemsByIds($ids: [ID]) {
@@ -41,15 +44,12 @@ export async function getItemsByIds(ids: string[]) {
       ids: ids,
     },
   });
-}
+});
 
-export async function getItemsByName(
-  name: string,
-  limit: number = -1,
-  offset: number = 0,
-) {
-  return apolloClient.query({
-    query: gql(`
+export const getItemsByName = cache(
+  async (name: string, limit: number = -1, offset: number = 0) => {
+    return apolloClient.query({
+      query: gql(`
       query itemsByName($name: String, $limit: Int, $offset: Int) {
         items(name: $name, limit: $limit, offset: $offset) {
           id
@@ -61,10 +61,11 @@ export async function getItemsByName(
         }
       }
     `),
-    variables: {
-      name: name,
-      limit: limit,
-      offset: offset,
-    },
-  });
-}
+      variables: {
+        name: name,
+        limit: limit,
+        offset: offset,
+      },
+    });
+  },
+);

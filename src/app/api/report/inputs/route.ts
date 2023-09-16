@@ -1,9 +1,9 @@
-import prisma from "@/lib/prismaClient";
+import { getAllInputItems } from "@/queries/dbItems";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const inputItems = await prisma.inputItem.findMany();
+    const inputItems = await getAllInputItems();
     return NextResponse.json(inputItems);
   } catch (error) {
     console.error(error);

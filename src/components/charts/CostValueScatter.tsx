@@ -1,28 +1,26 @@
 import ScatterChart from "./Scatter";
 import config from "@/../tailwind.config.js";
 import { makeHueRotationSteps } from "@/lib/color";
-import prisma from "@/lib/prismaClient";
-import { getItemsByIds } from "@/queries/items";
+import { getItemsByIds } from "@/queries/apiItems";
+import { getAllReportsWithInputItems } from "@/queries/reports";
 import { ChartData, ChartOptions } from "chart.js";
 
 const { colors } = config.theme;
 
 export default async function CostValueScatter() {
   try {
-    const reports = await prisma.report.findMany({
-      select: {
+    const reports = await getAllReportsWithInputItems(
+      {
         id: true,
         value: true,
         cost: true,
-        inputItem: {
-          select: {
-            id: true,
-            itemId: true,
-            quantity: true,
-          },
-        },
       },
-    });
+      {
+        id: true,
+        itemId: true,
+        quantity: true,
+      },
+    );
 
     const inputItemsSet = new Set(
       reports.map((report) => report.inputItem.itemId),
